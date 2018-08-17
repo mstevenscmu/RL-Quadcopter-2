@@ -37,6 +37,9 @@ class Task():
                 return True
         return False
 
+    def target_distance(self):
+        return (abs(self.sim.pose[:3] - self.target_pos)).sum()
+
     def get_reward(self):
         """Uses current pose of sim to return reward."""
         reward = 1.-.3*(abs(self.sim.pose[:3] - self.target_pos)).sum()
@@ -56,6 +59,8 @@ class Task():
             done = self.sim.next_timestep(rotor_speeds) # update the sim pose and velocities
             reward += self.get_reward()
             pose_all.append(self.sim.pose)
+            if self.on_target():
+                done = True
         next_state = np.concatenate(pose_all)
         return next_state, reward, done
 
