@@ -47,7 +47,7 @@ class Task():
     def get_reward(self):
         """Uses current pose of sim to return reward."""
         # reward = 1.-.3*(abs(self.sim.pose[:3] - self.target_pos)).sum()
-        reward = 1. - self.target_distance()
+        reward = 1000. - self.target_distance()**1.5
 
         if self.on_target() and self.stop_on_target is True:
             reward += 100000
@@ -56,7 +56,10 @@ class Task():
             reward -= np.power(self.sim.angular_v, np.array([2, 2, 2])).sum()
 
         if self.has_crashed():
-            reward -= 100000
+            # Good for takeoff
+            # reward -= 100000
+
+            reward -= 1000000
         return reward
 
     def step(self, rotor_speeds):
@@ -94,7 +97,7 @@ def LandTask():
     return Task(init_pose, init_velocities, init_angle_velocities, runtime, target_pos=LAND, stop_on_target=False)
 
 def HoverTask():
-    return Task(np.array(HOVER), init_velocities, init_angle_velocities, runtime, target_pos=HOVER, stop_on_target=False, rotation_penalty=True)
+    return Task(np.array(HOVER + [0., 0., 0.]), init_velocities, init_angle_velocities, runtime, target_pos=HOVER, stop_on_target=False, rotation_penalty=True)
 
 def TakeoffTask():
     return Task(init_pose, init_velocities, init_angle_velocities, runtime, target_pos=TAKEOFF, stop_on_target=True, rotation_penalty=True)
