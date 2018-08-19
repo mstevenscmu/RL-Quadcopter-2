@@ -5,7 +5,7 @@ class Task():
     """Task (environment) that defines the goal and provides feedback to the agent."""
     def __init__(self, init_pose=None, init_velocities=None,
         init_angle_velocities=None, runtime=5., target_pos=None,
-        stop_on_target=False):
+        stop_on_target=False, rotation_penalty=False):
         """Initialize a Task object.
         Params
         ======
@@ -25,6 +25,7 @@ class Task():
         self.action_size = 4
 
         self.stop_on_target = stop_on_target
+        self.rotation_penalty = rotation_penalty
         # Goal
         self.target_pos = target_pos if target_pos is not None else np.array([0., 0., 10.])
 
@@ -40,14 +41,19 @@ class Task():
         return False
 
     def target_distance(self):
-        return (abs(self.sim.pose[:3] - self.target_pos)).sum()
+        # return (abs(self.sim.pose[:3] - self.target_pos)).sum()
+        return np.sqrt(np.power(self.sim.pose[:3] - self.target_pos, np.array([2, 2, 2])).sum())
 
     def get_reward(self):
         """Uses current pose of sim to return reward."""
-        reward = 1.-.3*(abs(self.sim.pose[:3] - self.target_pos)).sum()
+        # reward = 1.-.3*(abs(self.sim.pose[:3] - self.target_pos)).sum()
+        reward = 1. - self.target_distance()
 
         if self.on_target() and self.stop_on_target is True:
             reward += 100000
+
+        if self.rotation_penalty:
+            reward -= np.power(self.sim.angular_v, np.array([2, 2, 2])).sum()
 
         if self.has_crashed():
             reward -= 100000
@@ -88,10 +94,10 @@ def LandTask():
     return Task(init_pose, init_velocities, init_angle_velocities, runtime, target_pos=LAND, stop_on_target=False)
 
 def HoverTask():
-    return Task(np.array(HOVER), init_velocities, init_angle_velocities, runtime, target_pos=HOVER, stop_on_target=False)
+    return Task(np.array(HOVER), init_velocities, init_angle_velocities, runtime, target_pos=HOVER, stop_on_target=False, rotation_penalty=True)
 
 def TakeoffTask():
-    return Task(init_pose, init_velocities, init_angle_velocities, runtime, target_pos=TAKEOFF, stop_on_target=True)
+    return Task(init_pose, init_velocities, init_angle_velocities, runtime, target_pos=TAKEOFF, stop_on_target=True, rotation_penalty=True)
 
 def OffsetTask():
     return Task(init_pose, init_velocities, init_angle_velocities, runtime, target_pos=OFFSET, stop_on_target=False)
