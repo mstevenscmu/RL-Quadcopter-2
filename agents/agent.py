@@ -36,11 +36,11 @@ class Actor:
 
         # Add hidden layers
         net = layers.Dense(units=32, activation='relu')(states)
-        net = layers.BatchNormalization()(net)
+        # net = layers.BatchNormalization()(net)
         net = layers.Dense(units=64, activation='relu')(net)
-        net = layers.BatchNormalization()(net)
+        # net = layers.BatchNormalization()(net)
         net = layers.Dense(units=32, activation='relu')(net)
-        net = layers.BatchNormalization()(net)
+        # net = layers.BatchNormalization()(net)
 
         # Try different layer sizes, activations, add batch normalization, regularizers, etc.
 
@@ -101,7 +101,9 @@ class Critic:
 
         # Add hidden layer(s) for action pathway
         net_actions = layers.Dense(units=32, activation='relu')(actions)
+        # net_actions = layers.BatchNormalization()(net_actions)
         net_actions = layers.Dense(units=64, activation='relu')(net_actions)
+        # net_actions = layers.BatchNormalization()(net_actions)
 
         # Try different layer sizes, activations, add batch normalization, regularizers, etc.
 
@@ -155,9 +157,9 @@ class DDPG():
         self.exploration_mu = 0
         self.exploration_theta = 0.15 * 2
         self.exploration_sigma = 0.2 * 2
-        # self.exploration_mu = 0
-        # self.exploration_theta = 0.15
-        # self.exploration_sigma = 0.2
+        self.exploration_mu = 0
+        self.exploration_theta = 0.15
+        self.exploration_sigma = 0.2
 
         self.noise = OUNoise(self.action_size, self.exploration_mu, self.exploration_theta, self.exploration_sigma)
 
